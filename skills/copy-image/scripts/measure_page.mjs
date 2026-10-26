@@ -35,7 +35,8 @@ if (!url) {
   process.exit(2);
 }
 // # を含むパスは、そのまま file:// に付けると # から先が無視されるので、必ず pathToFileURL を通す
-const target = /^https?:\/\//.test(url) ? url : pathToFileURL(path.resolve(url)).href;
+// file:// で渡された時はそのまま使う（パスとして足すと file:/… が二重になる）
+const target = /^(https?|file):\/\//.test(url) ? url : pathToFileURL(path.resolve(url)).href;
 const host = (() => {
   try {
     return new URL(target).hostname || 'file';
