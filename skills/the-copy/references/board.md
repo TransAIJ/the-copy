@@ -11,7 +11,7 @@
   "use": "X投稿",
   "source": { "title": "元の物の名前", "thumb": "" },
   "parts": [
-    { "lane": "t2t", "name": "冒頭の1文", "fixed": "1文 18〜25字", "blank": "自分の体験", "filled": "" }
+    { "lane": "t2t", "name": "冒頭の1文", "fixed": "失敗の場面から入る", "blank": "自分の体験", "filled": "" }
   ],
   "output": { "title": "", "thumb": "" },
   "meter": { "over": 0, "under": 0 },
@@ -25,7 +25,7 @@
 | kind | 主な変換（t2t・i2i・v2v） |
 | use | 用途の名前（X投稿・LP など。`uses.md` の言葉） |
 | source | 元の物の名前と、小さな画像（コピー盤のフォルダからの相対パス。無ければ空） |
-| parts | 部品。lane は変換、fixed は①の値（短く）、blank は②の欄の名前、filled は埋めた中身（短く） |
+| parts | 部品。lane は変換、fixed は①写す物（構造か見せ方を短く。寸法は書かない）、blank は②の欄の名前、filled は埋めた中身（短く） |
 | output | できた物の名前と小さな画像 |
 | meter | 写しすぎ（over）と写せていない（under）。0〜100。`judge.md` の数え方 |
 | share_url | 最後の画面のボタンで開く URL。無ければボタンを出しません |
