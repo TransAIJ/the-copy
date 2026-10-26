@@ -5,10 +5,12 @@
 {
   "size": [1080, 1920], "fps": 30,
   "font": "Noto Sans CJK JP",            # Windows は "Meiryo"、Mac は "Hiragino Sans" など
-  "telop": {"size": 76, "bottom": 0.30, "outline": 7, "color": "#FFFFFF", "outline_color": "#000000", "chars": 11},
+  "telop": {"size": 76, "bottom": 0.30, "outline": 7, "color": "#FFFFFF", "outline_color": "#000000", "chars": 11,
+            "red": "#E60012", "box": null},     # box に色（例 "#000000"）を入れると、縁取りでなく箱の上の文字になる
   "bgm": {"file": "素材棚/自分の素材/bgm.mp3", "volume": 0.25},   # 無ければ省く
   "voice": "素材棚/自分の素材/voice.wav",                         # 無ければ省く
-  "cuts": [ {"src": "画像か動画", "sec": 1.6, "text": "テロップ", "start": 0} ]
+  "cuts": [ {"src": "画像か動画", "sec": 1.6, "text": "テロップの[[強調]]", "start": 0, "size": 96, "bottom": 0.5, "chars": 8} ]
+                                        # size・bottom・chars はそのカットだけ変える時に書く
 }
 使い方: python3 render_short.py <カット表.json> --out <書き出し先.mp4>
 """
@@ -28,13 +30,34 @@ def ass_color(hexstr):
     return f"&H00{b}{g}{r}".upper()
 
 
-def wrap(text, n):
+def wrap(text, n, base_hex, red_hex):
+    """[[ここ]] で囲んだ所を強調の色にして、n 文字で折り返す。"""
+    base, red = ass_color(base_hex), ass_color(red_hex)
+    lines, cur, on, i = [], [], False, 0
+    text = str(text)
+    while i < len(text):
+        if text.startswith("[[", i) or text.startswith("]]", i):
+            on = text[i] == "["
+            i += 2
+            continue
+        ch = text[i]
+        i += 1
+        if ch == "\n" or len(cur) >= n:
+            lines.append(cur)
+            cur = []
+            if ch == "\n":
+                continue
+        cur.append((ch, on))
+    lines.append(cur)
     out = []
-    for line in str(text).split("\n"):
-        while len(line) > n:
-            out.append(line[:n])
-            line = line[n:]
-        out.append(line)
+    for ln in lines:
+        s, last = "", False
+        for ch, r in ln:
+            if r != last:
+                s += "{\\c%s&}" % (red if r else base)
+                last = r
+            s += ch
+        out.append(s)
     return r"\N".join(x for x in out if x)
 
 
@@ -55,7 +78,7 @@ def main():
     spec = json.load(open(a.table, encoding="utf-8"))
     W, H = spec.get("size", [1080, 1920])
     fps = spec.get("fps", 30)
-    tel = {"size": 76, "bottom": 0.30, "outline": 7, "color": "#FFFFFF", "outline_color": "#000000", "chars": 11, **spec.get("telop", {})}
+    tel = {"size": 76, "bottom": 0.30, "outline": 7, "color": "#FFFFFF", "outline_color": "#000000", "chars": 11, "red": "#E60012", "box": None, **spec.get("telop", {})}
     cuts = spec["cuts"]
     total = round(sum(c["sec"] for c in cuts), 3)
     out = os.path.abspath(a.out)
@@ -65,12 +88,15 @@ def main():
     lines = ["[Script Info]", "ScriptType: v4.00+", f"PlayResX: {W}", f"PlayResY: {H}", "WrapStyle: 2", "",
              "[V4+ Styles]",
              "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding",
-             f"Style: T,{spec.get('font', 'Noto Sans CJK JP')},{tel['size']},{ass_color(tel['color'])},&H00FFFFFF,{ass_color(tel['outline_color'])},&H00000000,-1,0,0,0,100,100,0,0,1,{tel['outline']},0,2,60,60,{int(H * tel['bottom'])},1",
+             f"Style: T,{spec.get('font', 'Noto Sans CJK JP')},{tel['size']},{ass_color(tel['color'])},&H00FFFFFF,{ass_color(tel['box'] or tel['outline_color'])},&H00000000,-1,0,0,0,100,100,0,0,{3 if tel['box'] else 1},{tel['outline']},0,2,60,60,{int(H * tel['bottom'])},1",
              "", "[Events]", "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"]
     pos = 0.0
     for c in cuts:
         if c.get("text"):
-            lines.append(f"Dialogue: 0,{t(pos)},{t(pos + c['sec'])},T,,0,0,0,,{wrap(c['text'], tel['chars'])}")
+            ov = ""
+            if "bottom" in c or "size" in c:
+                ov = "{\\an2\\pos(%d,%d)\\fs%d}" % (W // 2, int(H * (1 - c.get("bottom", tel["bottom"]))), c.get("size", tel["size"]))
+            lines.append(f"Dialogue: 0,{t(pos)},{t(pos + c['sec'])},T,,0,0,0,,{ov}{wrap(c['text'], c.get('chars', tel['chars']), tel['color'], tel['red'])}")
         pos += c["sec"]
     open(os.path.join(work, "telop.ass"), "w", encoding="utf-8").write("\n".join(lines) + "\n")
 

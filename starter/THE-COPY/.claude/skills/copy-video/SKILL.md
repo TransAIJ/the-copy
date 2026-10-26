@@ -59,7 +59,7 @@ python3 scripts/transcribe.py 素材棚/元の物/<動画> --out 素材棚/元�
 python3 scripts/render_short.py できた物/<名前>/cuts.json --out できた物/<名前>/short.mp4
 ```
 
-   形は `scripts/render_short.py` の先頭にあります。素材は自分の写真・画面写真・自分で撮った動画だけを使います。BGM は使ってよい物だけにします
+   形は `scripts/render_short.py` の先頭にあります。テロップの中で強調する所は `[[ここ]]` で囲みます。画像の明るさがカットごとに違う時は、`telop.box` で文字の下に箱を敷きます。素材は自分の写真・画面写真・自分で撮った動画だけを使います。BGM は使ってよい物だけにします
 4. 書き出した動画も `video_measure.py` で測り、元の値と並べます
 
 ## Step 7: 比べる
