@@ -39,6 +39,7 @@ main{display:grid;grid-template-columns:1fr 1.6fr 1fr;gap:14px;align-items:start
 .part .fixed{font-family:var(--mono);background:rgba(232,138,60,.14);color:#f2b47c}
 .part .blank{border:1px dashed var(--purple);color:#bba8ee}
 .part .blank.filled{border-style:solid;background:rgba(139,111,214,.16);color:var(--text)}
+.s0 .part,.s1 .part{display:none}
 .s2 .part{animation:fly .7s cubic-bezier(.2,.8,.2,1) both}
 @keyframes fly{from{opacity:0;transform:translateX(-60px) rotate(-6deg) scale(.9)}to{opacity:1;transform:none}}
 .s3 .part .fixed,.s3 .part .blank,.s4 .part .fixed,.s4 .part .blank{display:block}
