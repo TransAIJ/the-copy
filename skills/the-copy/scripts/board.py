@@ -82,8 +82,14 @@ def merge(base, extra):
     return out
 
 
+def safe_json(obj):
+    """script 要素の中に置いても閉じられないよう、< > & を \\u 形式にした JSON。"""
+    text = json.dumps(obj, ensure_ascii=False)
+    return text.replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
+
+
 def inject(html, job, play):
-    shim = SHIM.replace("__JOB__", json.dumps(job, ensure_ascii=False) if job else "null")
+    shim = SHIM.replace("__JOB__", safe_json(job) if job else "null")
     shim = shim.replace("__PLAY__", "true" if play else "false")
     html = re.sub(r'<script id="the-copy-shim">.*?</script>', "", html, flags=re.S)
     m = re.search(r"<head[^>]*>", html, flags=re.I)

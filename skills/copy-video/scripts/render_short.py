@@ -49,9 +49,9 @@ def wrap(text, n, base_hex, red_hex):
                 continue
         cur.append((ch, on))
     lines.append(cur)
-    out = []
+    out, last = [], False  # ASS の \\N は色を戻さないので、色の状態は行をまたいで持ち越す
     for ln in lines:
-        s, last = "", False
+        s = ""
         for ch, r in ln:
             if r != last:
                 s += "{\\c%s&}" % (red if r else base)

@@ -26,7 +26,7 @@ def sentences(text):
 
 def ending(s):
     s = re.sub(r"[。！？!?\s」』）)]+$", "", s)
-    for e in ("ます", "ました", "です", "でした", "ません", "ください", "だ", "だった", "た", "る", "い", "ない"):
+    for e in sorted(("ます", "ました", "です", "でした", "ません", "ください", "だ", "だった", "た", "る", "い", "ない"), key=len, reverse=True):
         if s.endswith(e):
             return e
     if not s:
