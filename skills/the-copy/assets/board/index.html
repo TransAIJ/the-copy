@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>THE・COPY</title>
+<style>
+:root{
+  --bg:#0c0b10; --panel:#15131c; --line:#2a2633; --text:#ece8f2; --muted:#9b94a8;
+  --orange:#e88a3c; --purple:#8b6fd6; --gold:#b89a5a;
+  --sans:"Noto Sans JP","Hiragino Sans","Yu Gothic UI","Yu Gothic","Meiryo",system-ui,sans-serif;
+  --mono:ui-monospace,"SFMono-Regular","Menlo","Consolas",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100%}
+body{padding:20px 16px 28px;max-width:1080px;margin:0 auto}
+header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--gold);padding-bottom:10px}
+h1{font-size:20px;letter-spacing:.12em;font-weight:700}
+#use{font-size:14px;color:var(--muted)}
+#kind{font-family:var(--mono);font-size:12px;color:var(--orange);border:1px solid var(--orange);border-radius:3px;padding:1px 6px}
+ol#steps{list-style:none;display:flex;gap:6px;margin:14px 0 16px;flex-wrap:wrap}
+ol#steps li{font-size:13px;color:var(--muted);padding:4px 10px;border:1px solid var(--line);border-radius:999px;transition:all .4s}
+ol#steps li.done{color:var(--text);border-color:#4a4258}
+ol#steps li.now{color:#0c0b10;background:var(--orange);border-color:var(--orange);font-weight:700}
+main{display:grid;grid-template-columns:1fr 1.6fr 1fr;gap:14px;align-items:start}
+@media (max-width:760px){main{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px;position:relative;overflow:hidden;min-height:120px}
+.panel h2{font-size:12px;color:var(--muted);font-weight:500;margin-bottom:8px;letter-spacing:.06em}
+.card-title{font-size:15px;font-weight:700;line-height:1.5}
+.thumb{width:100%;aspect-ratio:4/3;border-radius:6px;background:#1d1a26 center/cover no-repeat;margin-top:8px;border:1px solid var(--line)}
+.scan{position:absolute;left:0;right:0;height:38%;top:-40%;background:linear-gradient(180deg,transparent,rgba(232,138,60,.28),rgba(232,138,60,.55),transparent);pointer-events:none;opacity:0}
+.s1 .scan{opacity:1;animation:scan 1.6s linear infinite}
+@keyframes scan{from{top:-40%}to{top:100%}}
+.lanes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.lane h3{font-family:var(--mono);font-size:12px;color:var(--purple);margin-bottom:6px;text-align:center}
+.part{background:#1c1925;border:1px solid var(--line);border-radius:6px;padding:7px 8px;margin-bottom:7px;font-size:12.5px;line-height:1.45;transform-origin:left center}
+.part .name{font-weight:700}
+.part .fixed,.part .blank{display:none;margin-top:5px;font-size:11.5px;border-radius:4px;padding:2px 6px}
+.part .fixed{font-family:var(--mono);background:rgba(232,138,60,.14);color:#f2b47c}
+.part .blank{border:1px dashed var(--purple);color:#bba8ee}
+.part .blank.filled{border-style:solid;background:rgba(139,111,214,.16);color:var(--text)}
+.s2 .part{animation:fly .7s cubic-bezier(.2,.8,.2,1) both}
+@keyframes fly{from{opacity:0;transform:translateX(-60px) rotate(-6deg) scale(.9)}to{opacity:1;transform:none}}
+.s3 .part .fixed,.s3 .part .blank,.s4 .part .fixed,.s4 .part .blank{display:block}
+.s3 .part{animation:split .6s ease both}
+@keyframes split{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
+.s4 .blank.filled{animation:fill .8s ease both}
+@keyframes fill{from{background:transparent;color:transparent}to{}}
+.recipe{display:none;text-align:center;padding:26px 10px;border:1px solid var(--gold);border-radius:8px;position:relative}
+.recipe .count{font-size:13px;color:var(--muted);margin-top:6px}
+.stamp{position:absolute;right:14px;top:10px;width:58px;height:58px;border:2px solid var(--orange);color:var(--orange);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;transform:rotate(-12deg)}
+.s5 .lanes,.s6 .lanes,.s7 .lanes{display:none}
+.s5 .recipe,.s6 .recipe,.s7 .recipe{display:block}
+.s5 .recipe{animation:gather .8s cubic-bezier(.2,.8,.2,1) both}
+.s5 .stamp{animation:stamp .5s .6s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes gather{from{opacity:0;transform:scale(1.25)}to{opacity:1;transform:none}}
+@keyframes stamp{from{opacity:0;transform:rotate(-12deg) scale(2.2)}to{opacity:1;transform:rotate(-12deg) scale(1)}}
+#out .body{opacity:.15;transition:opacity .4s}
+.s6 #out .body,.s7 #out .body{opacity:1}
+.s6 #out .body{animation:eject 1s cubic-bezier(.2,.8,.2,1) both}
+@keyframes eject{from{transform:translateY(70%);opacity:0}to{transform:none;opacity:1}}
+.meters{display:none;margin-top:12px}
+.s7 .meters{display:block}
+.meter{margin-top:8px;font-size:12px;color:var(--muted)}
+.meter .bar{height:8px;background:#221f2b;border-radius:4px;overflow:hidden;margin-top:4px}
+.meter .bar i{display:block;height:100%;width:0;transition:width 1s ease}
+.meter.over i{background:var(--orange)}
+.meter.under i{background:var(--purple)}
+.meter b{color:var(--text);font-family:var(--mono);font-weight:500;margin-left:6px}
+#share{display:none;margin-top:14px;width:100%;padding:11px;border-radius:6px;border:0;background:var(--orange);color:#0c0b10;font-weight:700;font-size:14px;font-family:var(--sans);cursor:pointer}
+.s7 #share.on{display:block}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.scan{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <h1>THE・COPY</h1>
+  <span id="kind">t2t</span>
+  <span id="use"></span>
+</header>
+<ol id="steps"></ol>
+<main id="board">
+  <section class="panel" id="src">
+    <h2>元</h2>
+    <div class="card-title" id="srcTitle"></div>
+    <div class="thumb" id="srcThumb"></div>
+    <div class="scan"></div>
+  </section>
+  <section class="panel" id="mid">
+    <h2 id="midLabel">部品</h2>
+    <div class="lanes">
+      <div class="lane"><h3>t2t</h3><div data-lane="t2t"></div></div>
+      <div class="lane"><h3>i2i</h3><div data-lane="i2i"></div></div>
+      <div class="lane"><h3>v2v</h3><div data-lane="v2v"></div></div>
+    </div>
+    <div class="recipe">
+      <div class="stamp">型</div>
+      <div class="card-title" id="recipeName"></div>
+      <div class="count" id="recipeCount"></div>
+    </div>
+  </section>
+  <section class="panel" id="out">
+    <h2>できた物</h2>
+    <div class="body">
+      <div class="card-title" id="outTitle"></div>
+      <div class="thumb" id="outThumb"></div>
+    </div>
+    <div class="meters">
+      <div class="meter over">写しすぎ<b id="overV">0</b><div class="bar"><i id="overB"></i></div></div>
+      <div class="meter under">写せていない<b id="underV">0</b><div class="bar"><i id="underB"></i></div></div>
+    </div>
+    <button id="share" type="button">できた物を引用リポストする</button>
+  </section>
+</main>
+<script>
+(function(){
+  var NAMES = ["待つ","見る","分ける","①と②","埋める","型にする","作る","比べる"];
+  var SAMPLE = {
+    stage: 1, kind: "t2t", use: "X投稿",
+    source: {title: "伸びている投稿（見本）", thumb: ""},
+    parts: [
+      {lane:"t2t", name:"冒頭の1文", fixed:"1文 18〜25字", blank:"自分の体験", filled:"先月の失敗"},
+      {lane:"t2t", name:"展開", fixed:"段落6・各2〜4文", blank:"自分の数字", filled:"作業時間 −40%"},
+      {lane:"t2t", name:"CTA", fixed:"最後の1行", blank:"自分の導線", filled:"プロフへ"},
+      {lane:"i2i", name:"添付画像", fixed:"4:5・文字2行", blank:"自分の写真", filled:"作業机"}
+    ],
+    output: {title: "自分の投稿", thumb: ""},
+    meter: {over: 12, under: 18},
+    share_url: ""
+  };
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var demoStage = reduce ? 7 : 1, demoAt = Date.now(), last = "";
+  var $ = function(id){ return document.getElementById(id); };
+  var steps = $("steps");
+  NAMES.slice(1).forEach(function(n){ var li=document.createElement("li"); li.textContent=n; steps.appendChild(li); });
+
+  function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
+  function thumb(el, src){ el.style.backgroundImage = src ? "url(\"" + String(src).replace(/"/g, "") + "\")" : ""; el.style.display = src ? "" : "none"; }
+
+  function render(job){
+    var key = JSON.stringify(job);
+    if (key === last) return;
+    var prevStage = last ? JSON.parse(last).stage : -1;
+    last = key;
+    var st = Math.max(0, Math.min(7, job.stage | 0));
+    var board = $("board");
+    if (st !== prevStage) { board.className = ""; void board.offsetWidth; }
+    board.className = "s" + st;
+    $("kind").textContent = job.kind || "";
+    $("use").textContent = job.use || "";
+    Array.prototype.forEach.call(steps.children, function(li, i){
+      li.className = (i + 1 < st) ? "done" : (i + 1 === st ? "now" : "");
+    });
+    $("srcTitle").textContent = (job.source && job.source.title) || "";
+    thumb($("srcThumb"), job.source && job.source.thumb);
+    ["t2t","i2i","v2v"].forEach(function(l){
+      var box = document.querySelector('[data-lane="' + l + '"]');
+      var parts = (job.parts || []).filter(function(p){ return p.lane === l; });
+      box.innerHTML = parts.map(function(p, i){
+        var filled = st >= 4 && p.filled;
+        return '<div class="part" style="animation-delay:' + (i * 0.18) + 's"><div class="name">' + esc(p.name) + '</div>' +
+          (p.fixed ? '<div class="fixed">' + esc(p.fixed) + '</div>' : '') +
+          (p.blank ? '<div class="blank' + (filled ? ' filled' : '') + '">' + esc(filled ? p.filled : p.blank) + '</div>' : '') + '</div>';
+      }).join("");
+    });
+    var n = (job.parts || []).length;
+    $("midLabel").textContent = st >= 5 ? "型" : "部品";
+    $("recipeName").textContent = (job.use || "") + " の型";
+    $("recipeCount").textContent = "部品 " + n;
+    $("outTitle").textContent = (job.output && job.output.title) || "";
+    thumb($("outThumb"), job.output && job.output.thumb);
+    var m = job.meter || {}, over = Math.max(0, Math.min(100, m.over || 0)), under = Math.max(0, Math.min(100, m.under || 0));
+    $("overV").textContent = over; $("underV").textContent = under;
+    setTimeout(function(){ $("overB").style.width = (st >= 7 ? over : 0) + "%"; $("underB").style.width = (st >= 7 ? under : 0) + "%"; }, 60);
+    var share = $("share");
+    share.className = job.share_url ? "on" : "";
+    share.onclick = function(){ if (job.share_url) window.open(job.share_url, "_blank", "noopener"); };
+  }
+
+  function tick(){
+    fetch("job.json?t=" + Date.now(), {cache: "no-store"}).then(function(r){
+      if (!r.ok) throw new Error(r.status);
+      return r.json();
+    }).then(render).catch(function(){
+      var j = Object.assign({}, SAMPLE, {stage: demoStage});
+      render(j);
+      if (!reduce && Date.now() - demoAt > 2200) { demoStage = demoStage >= 7 ? 1 : demoStage + 1; demoAt = Date.now(); }
+    });
+  }
+  tick();
+  setInterval(tick, 1000);
+})();
+</script>
+</body>
+</html>
