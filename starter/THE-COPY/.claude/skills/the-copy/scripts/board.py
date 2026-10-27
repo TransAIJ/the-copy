@@ -33,13 +33,18 @@ SHIM = """<script id="the-copy-shim">
     var j = INLINE || window.THE_COPY_JOB || null;
     if (!j) return null;
     if (PLAY && INLINE) {
+      // 段ごとの長さ（ミリ秒）。埋める段と比べる段は、文字が打ち終わるまで長めに置く
+      var DUR = [0, 2600, 2400, 2400, 4200, 2600, 2400, 4200];
       var last = Math.max(1, Math.min(7, INLINE.stage || 7));
-      var st = Math.min(last, 1 + Math.floor((Date.now() - t0) / 2200));
+      var el = Date.now() - t0, st = 1;
+      while (st < last && el >= DUR[st]) { el -= DUR[st]; st++; }
       j = Object.assign({}, INLINE, {stage: st});
     }
     return j;
   }
   if (location.protocol === 'file:' && !INLINE) {
+    // 開いた時に見本が一瞬出ないよう、最初の job.js は読み終えてから盤を描く
+    document.write('<script src="job.js"><\\/script>');
     setInterval(function(){
       var s = document.createElement('script');
       s.src = 'job.js?t=' + Date.now();
