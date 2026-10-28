@@ -4,7 +4,7 @@
 使い方: python3 dev/build.py
 出す物:
   starter/THE-COPY/        Code タブで開く作業フォルダ（.claude/skills/ に4本・素材棚・できた物・CLAUDE.md）
-  dist/the-copy.zip        claude.ai の「プラグインをアップロード」に使う zip
+  dist/the-copy.zip        claude.ai の「プラグインをアップロード」に使う zip（.claude-plugin/ は plugin.json だけ）
   dist/the-copy-starter.zip  作業フォルダ版の zip
 """
 import os
@@ -117,7 +117,9 @@ def main():
         with open(p, "w", encoding="utf-8") as f:
             f.write(text)
     os.makedirs(DIST, exist_ok=True)
-    zipdir(os.path.join(DIST, "the-copy.zip"), ROOT, [".claude-plugin", "skills", "README.md", "LICENSE"])
+    # claude.ai に上げる zip の .claude-plugin/ は manifest だけにする（公式の文書「Put only the manifest inside .claude-plugin/」）。
+    # marketplace.json と icon.png はリポジトリ（マーケットプレイスの入口）にだけ置く
+    zipdir(os.path.join(DIST, "the-copy.zip"), ROOT, [os.path.join(".claude-plugin", "plugin.json"), "skills", "README.md", "LICENSE"])
     zipdir(os.path.join(DIST, "the-copy-starter.zip"), os.path.join(ROOT, "starter"), ["THE-COPY"])
     for z in ("the-copy.zip", "the-copy-starter.zip"):
         print(f"○ dist/{z}（{os.path.getsize(os.path.join(DIST, z)) // 1024} KB）")

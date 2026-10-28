@@ -1,6 +1,7 @@
 {
   "name": "the-copy",
-  "version": "0.2.3",
+  "displayName": "THE・COPY",
+  "version": "0.2.4",
   "description": "伸びている他人のコンテンツを部品に分け、売れている理由・構造・中身・情報量を写し、寸法と言い回しは写さず、自分の素材で同じ質の物を作る型（スキル）を残す。文章（t2t）・画像（i2i）・動画（v2v）の3つ。",
   "author": {
     "name": "TransAIJ",
@@ -9,5 +10,12 @@
   "homepage": "https://github.com/TransAIJ/the-copy",
   "repository": "https://github.com/TransAIJ/the-copy",
   "license": "MIT",
-  "keywords": ["content", "ttp", "copywriting", "design", "video", "japanese"]
+  "keywords": [
+    "content",
+    "ttp",
+    "copywriting",
+    "design",
+    "video",
+    "japanese"
+  ]
 }
