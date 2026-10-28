@@ -6,7 +6,7 @@
   python3 board.py --dir .the-copy/board --init
   # 段が進むたびに（--job は JSON ファイルか JSON の文字列。変わった欄だけでよい）
   python3 board.py --dir .the-copy/board --stage 2 --job job-draft.json
-  # 盤を http://localhost:8765/ で開けるようにする（止めるまで動くので、裏で動かす）
+  # 盤を http://localhost:8765/ で開けるようにする（裏で動かす。job.json が15分変わらないと自分で止まる）
   python3 board.py --dir .the-copy/board --serve 8765
   # チャット用に、盤と job を1枚の HTML にまとめる
   python3 board.py --inline --job job.json --play --out copy-board.html
@@ -20,6 +20,8 @@ import re
 import shutil
 import sys
 import tempfile
+import threading
+import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ASSET = os.path.join(HERE, "..", "assets", "board", "index.html")
@@ -135,6 +137,8 @@ def main():
     ap.add_argument("--stage", type=int)
     ap.add_argument("--job", help="JSON ファイルか JSON の文字列（変わった欄だけでよい）")
     ap.add_argument("--serve", type=int, metavar="PORT")
+    ap.add_argument("--idle-exit", type=float, default=15, metavar="MIN",
+                    help="--serve の時、job.json がこの分数変わらなければ自分で止まる（0 で止まらない）")
     ap.add_argument("--inline", action="store_true", help="盤と job を1枚の HTML にまとめる（チャット用）")
     ap.add_argument("--play", action="store_true", help="--inline の時、1段から順に動かす")
     ap.add_argument("--out", help="--inline の書き出し先（無ければ標準出力）")
@@ -196,7 +200,25 @@ def main():
 
         handler = functools.partial(Quiet, directory=a.dir)
         with http.server.ThreadingHTTPServer(("127.0.0.1", a.serve), handler) as httpd:
-            print(f"○ http://localhost:{a.serve}/ で開けます（止める時は Ctrl+C）", flush=True)
+            if a.idle_exit > 0:
+                jp = os.path.join(a.dir, "job.json")
+
+                def watch():
+                    last = time.time()
+                    seen = os.path.getmtime(jp) if os.path.exists(jp) else None
+                    while True:
+                        time.sleep(5)
+                        m = os.path.getmtime(jp) if os.path.exists(jp) else None
+                        if m != seen:
+                            seen, last = m, time.time()
+                        elif time.time() - last > a.idle_exit * 60:
+                            httpd.shutdown()
+                            return
+
+                threading.Thread(target=watch, daemon=True).start()
+            mins = f"{a.idle_exit:g}分" if a.idle_exit > 0 else ""
+            tail = f"。job.json が{mins}変わらないと自分で止まります" if mins else ""
+            print(f"○ http://localhost:{a.serve}/ で開けます（止める時は Ctrl+C{tail}）", flush=True)
             httpd.serve_forever()
 
 

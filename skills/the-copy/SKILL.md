@@ -62,7 +62,7 @@ description: |
 
 ## 流れ
 
-分解表の書き方は `references/sheet.md`、用途ごとの見る単位・部品の雛形・①の測り方・②の欄は `references/uses.md` にあります。媒体ごとの手順は、文章が copy-text、画像と画面が copy-image、動画が copy-video のスキルです。段が進むたびにコピー盤を更新します（`references/board.md`）。
+分解表の書き方は `references/sheet.md`、用途ごとの見る単位・部品の雛形・①の測り方・②の欄は `references/uses.md` にあります。媒体ごとの手順は、文章が copy-text、画像と画面が copy-image、動画が copy-video のスキルです。作業フォルダでは、Step 0 で盤を置いてサーバーを裏で立て（`--init --serve 8765`）、**Step 1〜7 のそれぞれを始める時に、その段の番号で盤を1回ずつ書きます**（`--stage <段>`）。段を飛ばしてまとめて書きません。使う人は盤で、今どこを作っているかを見ています（`references/board.md`）。
 
 ### Step 0: 元の物と、作る物を決める（コピー盤 0）
 
@@ -138,7 +138,7 @@ description: |
 
 段が進むたびに、今の段と部品をコピー盤に出します。やり方は `references/board.md` です。
 
-- 作業フォルダ（Claude Code・Code タブ）: `python3 scripts/board.py --dir .the-copy/board --stage <段> --job <job の JSON>` で書き、最初の1回だけ `--serve` で開きます
+- 作業フォルダ（Claude Code・Code タブ）: 最初の1回だけ `--init --serve 8765` を裏で動かして開き、Step 1〜7 を始めるたびに `python3 scripts/board.py --dir .the-copy/board --stage <段> --job <job の JSON>` で書きます。最後に 7 を書いた後もサーバーは止めません（15分で自分で止まります）
 - チャット: 段ごとに出し直すと使う人の枠を使いすぎるので、**Step 2 の後と Step 7 の後の2回だけ**出します。`python3 scripts/board.py --inline` で1枚の HTML を作り、HTML の Artifact（またはファイル）として出します
 - 端末で「動きを減らす」設定の人には、動きが止まった画面で出ます
 

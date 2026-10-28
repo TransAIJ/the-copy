@@ -35,9 +35,9 @@
 ## 作業フォルダ（Claude Code・デスクトップアプリの Code タブ）
 
 ```bash
-# 最初の1回: 盤を置いて開く（小さなサーバーを裏で立てる。止めるまで動く）
+# 最初の1回（Step 0）: 盤を置いて開く（小さなサーバーを裏で立てる。job.json が15分変わらないと自分で止まる）
 python3 scripts/board.py --dir .the-copy/board --init --serve 8765
-# 段が進むたびに
+# Step 1〜7 のそれぞれを始める時に1回ずつ（段を飛ばさない）
 python3 scripts/board.py --dir .the-copy/board --stage 2 --job job-draft.json
 ```
 
@@ -45,7 +45,8 @@ python3 scripts/board.py --dir .the-copy/board --stage 2 --job job-draft.json
 - `job.json` と同じ中身の `job.js` も書くので、サーバー無しで `index.html` を直接開いても動きます
 - `--job` に渡す JSON は、変わった欄だけでかまいません（前の中身に重ねます）
 - Python が無い時は、Claude が `.the-copy/board/job.json` と `job.js`（`window.THE_COPY_JOB = {…};`）を直接書き、`index.html` を開いてもらいます
-- 仕事が終わったら、裏のサーバーを止めます
+- 段は Step 1〜7 を始めるたびに1つずつ書きます。まとめて最後に 7 を書くと、盤が途中を飛ばし、使う人には何をしているかが見えません
+- 最後の段（7）を書いた後も、裏のサーバーは止めません。盤は job.json を読んで最後の段の動きを出すのに数秒かかり、止めると盤が前の段のまま止まります。サーバーは job.json が15分変わらないと自分で止まります（`--idle-exit` で分を変えられます）
 
 ## チャット（claude.ai のウェブ・デスクトップのチャット）
 
