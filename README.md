@@ -43,6 +43,18 @@ claude plugin install the-copy --marketplace TransAIJ/the-copy
 
 または Claude Code の中で `/plugin marketplace add TransAIJ/the-copy` → `/plugin install the-copy@the-copy`。
 
+## スキル版（いちばん早く試す）
+
+THE・COPY を1つのスキルにまとめた `the-copy-skill.zip` です。手本の X 投稿が1つ入っているので、受け取ってすぐ1本作れます。
+
+- 落とす: https://github.com/TransAIJ/the-copy/releases/latest/download/the-copy-skill.zip
+- Claude Code: zip を展開し、`the-copy` フォルダを作業フォルダの `.claude/skills/`（どのフォルダでも使うなら `~/.claude/skills/`）に置きます。`claude` を起動して `/` を押すと `the-copy` が出ます
+- claude.ai: 設定 > 機能（Settings > Capabilities）のスキルで、zip をそのままアップロードします
+- 最初の1本の頼み方: `THE・COPYで、同梱の手本の作り方で、私の商品のX投稿を1本作って`。商品・誰に売るか・実績の3つを聞かれるので、答えると X 投稿が1本できます
+- プラグイン版と一緒に入れても、名前はぶつかりません（スキル版は `/the-copy`、プラグイン版は `/the-copy:the-copy`）
+
+同梱の手本（`examples/x-moto.txt`）は、作者の会社が自分で出した X 投稿です。手本の文と例は写さず、作り方だけを写します。
+
 ## 中身
 
 | スキル | 呼び方 | すること |
