@@ -2,8 +2,8 @@
 """starter/（作業フォルダ版）を skills/ から作り直し、配る zip を dist/ に作る。
 
 使い方: python3 dev/build.py
-出す物:
-  starter/THE-COPY/        Code タブで開く作業フォルダ（.claude/skills/ に4本・素材棚・できた物・CLAUDE.md）
+出すもの:
+  starter/THE-COPY/        Code タブで開く作業フォルダ（.claude/skills/ に4本・素材・完成・CLAUDE.md）
   dist/the-copy.zip        claude.ai の「プラグインをアップロード」に使う zip（.claude-plugin/ は plugin.json だけ）
   dist/the-copy-starter.zip  作業フォルダ版の zip
   dist/the-copy-skill.zip    スキル版（1つのスキル。一番上は the-copy/。claude.ai のスキルのアップロードと .claude/skills/ のどちらでも動く）
@@ -19,27 +19,28 @@ SKIP = {"__pycache__", ".DS_Store", "node_modules"}
 
 CLAUDE_MD = """# THE・COPY の作業フォルダ
 
-このフォルダでは THE・COPY を使います。他人のコンテンツが売れている理由・構造・中身・情報量を写して、自分の素材で同じ質の物を作る時は、
+このフォルダでは THE・COPY を使います。他人のコンテンツが売れている理由・構造・中身・情報量を真似して、自分の素材で同じ質のものを作る時は、
 `.claude/skills/the-copy/SKILL.md` の手順に従ってください。
 
-- 使う人の素材（②）は `素材棚/` にあります。作る前に `素材棚/わたし.md` を読みます
-- 写したい他人の物は `素材棚/元の物/` に置かれます
-- 作った物は `できた物/<日付>-<名前>/` に置きます
-- できた型（スキル）は `.claude/skills/<ブランド>-<用途>-<型>/` に置きます。次から同じ種類の物はその型で作ります
+- 使う人の素材（②）は `素材/` にあります。作る前に `素材/わたし.md` を読みます
+- 真似したい他人のものは `素材/お手本/` に置かれます
+- 作ったものは `完成/<日付>-<名前>/` に置きます
+- 作る前に、先に `python3 .claude/skills/the-copy/scripts/rename_folders.py` を1回動かします（0.2 で作ったフォルダを新しい名前に移す台本。わたし.md と型は消えません。移すものが無ければ何もしません）
+- できた型（スキル）は `.claude/skills/<ブランド>-<用途>-<型>/` に置きます。次から同じ種類のものはその型で作ります
 - 台本は各スキルのフォルダの `scripts/` にあります（例: `python3 .claude/skills/the-copy/scripts/board.py`）。Python が無い時は、Claude が読んで数えます
-- コピー盤は `.the-copy/board/` に置き、`python3 .claude/skills/the-copy/scripts/board.py --dir .the-copy/board --init --serve 8765` を裏で動かして開きます。Step 1〜7 を始めるたびに `--stage <段>` で1回ずつ書き、最後に 7 を書いた後もサーバーは止めません
+- ダッシュボードは `.the-copy/board/` に置き、`python3 .claude/skills/the-copy/scripts/board.py --dir .the-copy/board --init --serve 8765` を裏で動かして開きます。Step 1〜7 を始めるたびに `--stage <ステップ>` で1回ずつ書き、最後に 7 を書いた後もサーバーは止めません
 - 使う人の API キーやトークンを読み上げない・書き出さない。外に何も送らない
 """
 
-SHELF_README = """# 素材棚
+SHELF_README = """# 素材
 
-THE・COPY が、あなたの物（②一次情報）を探す場所です。ここにある物は、あなたの手元だけで使われ、外に送られません。
+THE・COPY が、あなたのもの（②一次情報）を探す場所です。ここにあるものは、あなたの手元だけで使われ、外に送られません。
 
-| 置く物 | 場所 |
+| 置くもの | 場所 |
 |---|---|
 | あなたについて（ブランド名・読み手・商品・実績・書き方の癖） | `わたし.md` |
-| 実績のスクショ・写真・過去の投稿で「良い」と決めた物・撮った動画・使ってよい BGM | `自分の素材/` |
-| 写したい他人の物（本文・スクショ・画面写真・URL の一覧） | `元の物/` |
+| 実績のスクショ・写真・過去の投稿で「良い」と決めたもの・撮った動画・使ってよい BGM | `自分の素材/` |
+| 真似したい他人のもの（本文・スクショ・画面写真・URL の一覧） | `お手本/` |
 
 埋めていない欄は、THE・COPY が作る前に1回だけまとめて質問します。答えはここに書き足すと、次から聞かれません。
 """
@@ -55,7 +56,7 @@ ME_MD = """# わたし
 ## 読み手（誰に向けて作るか）
 
 
-## 商品と価格（言ってよい物だけ）
+## 商品と価格（言ってよいものだけ）
 
 
 ## 実績（言ってよい数字と、その根拠）
@@ -100,9 +101,9 @@ def zipdir(zpath, base, items, prefix=""):
                     z.write(full, os.path.join(prefix, os.path.relpath(full, base)))
 
 
-SKILL_DESC = ("THE・COPY（ザ・コピー）。伸びている他人のX投稿・記事・LP・インスタ画像・ショート動画などを手本に、"
-              "売れている理由・構造・中身・情報量を写し、自分の素材で同じ質の物を作る。"
-              "「TTPして」「この投稿の作り方を写して」「同梱の手本でX投稿を作って」等の時。")
+SKILL_DESC = ("THE・COPY（ザ・コピー）。伸びている他人のX投稿・記事・LP・インスタ画像・ショート動画などをお手本に、"
+              "売れている理由・構造・中身・情報量を真似し、自分の素材で同じ質のものを作る。"
+              "「TTPして」「この投稿の作り方を真似して」「同梱のお手本でX投稿を作って」等の時。")
 
 # スキル版の入口（skills/the-copy/SKILL.md）で、スキルの名前を中のファイルの場所に替える所。1つでも見つからなければ止める
 ENTRY_SUBS = [
@@ -120,7 +121,7 @@ ENTRY_SUBS = [
 # references/ の中の別のスキルの名前（スキル版では同じフォルダにある）
 REF_SUBS = [
     ("（copy-image の「写真の作り方」）", "（`references/image.md` の「写真の作り方」）"),
-    ("`copy-text/scripts/text_stats.py --compare <元> <作った物>`", "`scripts/text_stats.py --compare <元> <作った物>`"),
+    ("`copy-text/scripts/text_stats.py --compare <元> <作ったもの>`", "`scripts/text_stats.py --compare <元> <作ったもの>`"),
 ]
 PART_SUBS = [
     ("the-copy スキル", "入口の SKILL.md"),
@@ -199,11 +200,11 @@ def main():
         copytree(os.path.join(ROOT, "skills", name), os.path.join(STARTER, ".claude", "skills", name))
     files = {
         "CLAUDE.md": CLAUDE_MD,
-        os.path.join("素材棚", "README.md"): SHELF_README,
-        os.path.join("素材棚", "わたし.md"): ME_MD,
-        os.path.join("素材棚", "元の物", ".gitkeep"): "",
-        os.path.join("素材棚", "自分の素材", ".gitkeep"): "",
-        os.path.join("できた物", ".gitkeep"): "",
+        os.path.join("素材", "README.md"): SHELF_README,
+        os.path.join("素材", "わたし.md"): ME_MD,
+        os.path.join("素材", "お手本", ".gitkeep"): "",
+        os.path.join("素材", "自分の素材", ".gitkeep"): "",
+        os.path.join("完成", ".gitkeep"): "",
         ".gitignore": ".env\n.env.*\n.the-copy/\nnode_modules/\n__pycache__/\n",
     }
     for rel, text in files.items():

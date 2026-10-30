@@ -3,7 +3,7 @@
 
 準備（1回だけ）: pip install faster-whisper
 使い方: python3 transcribe.py <動画か音声> --out <フォルダ> [--model small] [--lang ja]
-出す物: <フォルダ>/transcript.txt（時刻つき）・transcript.srt
+出すもの: <フォルダ>/transcript.txt（時刻つき）・transcript.srt
 長い動画（10分を超える）は、先に ffmpeg で10分ずつに分けてから1つずつ渡すと、メモリを使いすぎません。
 """
 import argparse

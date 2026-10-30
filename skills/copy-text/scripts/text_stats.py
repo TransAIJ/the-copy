@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""文章の量を数える・元と作った物の同じ言い回しを数える（標準ライブラリだけ）。
+"""文章の量を数える・元と作ったものの同じ言い回しを数える（標準ライブラリだけ）。
 
-全体の量（文字数・段落・箇条・数字を含む文）は情報量を見るために使います。1文の字数や語尾の割合も出しますが、型には写しません。
+全体の量（文字数・段落・箇条・数字を含む文）は情報量を見るために使います。1文の字数や語尾の割合も出しますが、型には真似しません。
 
 使い方:
   python3 text_stats.py <文章.txt>                     # 数える
@@ -106,11 +106,11 @@ def main():
         print(json.dumps(measure(read(a.files[0])), ensure_ascii=False, indent=1))
         return
     if len(a.files) != 2:
-        print("--compare には <元> <作った物> の2つを渡してください", file=sys.stderr)
+        print("--compare には <元> <作ったもの> の2つを渡してください", file=sys.stderr)
         sys.exit(2)
     src, out = read(a.files[0]), read(a.files[1])
     ms, mo = measure(src), measure(out)
-    print("| 項目 | 元 | 作った物 |\n|---|---|---|")
+    print("| 項目 | 元 | 作ったもの |\n|---|---|---|")
     for k in ms:
         print(f"| {k} | {json.dumps(ms[k], ensure_ascii=False)} | {json.dumps(mo[k], ensure_ascii=False)} |")
     allow = [x for x in a.allow.split(",") if x.strip()]

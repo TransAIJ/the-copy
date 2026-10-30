@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""THE・COPY のコピー盤を書く・開く台本（標準ライブラリだけ）。
+"""THE・COPY のダッシュボードを書く・開く台本（標準ライブラリだけ）。
 
 使い方:
-  # 作業フォルダに盤を置く（初回）
+  # 作業フォルダにダッシュボードを置く（初回）
   python3 board.py --dir .the-copy/board --init
-  # 段が進むたびに（--job は JSON ファイルか JSON の文字列。変わった欄だけでよい）
+  # ステップが進むたびに（--job は JSON ファイルか JSON の文字列。変わった欄だけでよい）
   python3 board.py --dir .the-copy/board --stage 2 --job job-draft.json
-  # 盤を http://localhost:8765/ で開けるようにする（裏で動かす。job.json が15分変わらないと自分で止まる）
+  # ダッシュボードを http://localhost:8765/ で開けるようにする（裏で動かす。job.json が15分変わらないと自分で止まる）
   python3 board.py --dir .the-copy/board --serve 8765
-  # チャット用に、盤と job を1枚の HTML にまとめる
+  # チャット用に、ダッシュボードと job を1枚の HTML にまとめる
   python3 board.py --inline --job job.json --play --out copy-board.html
 """
 import argparse
@@ -35,7 +35,7 @@ SHIM = """<script id="the-copy-shim">
     var j = INLINE || window.THE_COPY_JOB || null;
     if (!j) return null;
     if (PLAY && INLINE) {
-      // 段ごとの長さ（ミリ秒）。埋める段と比べる段は、文字が打ち終わるまで長めに置く
+      // ステップごとの長さ（ミリ秒）。埋めるステップと比べるステップは、文字が打ち終わるまで長めに置く
       var DUR = [0, 2600, 2400, 2400, 4200, 2600, 2400, 4200];
       var last = Math.max(1, Math.min(7, INLINE.stage || 7));
       var el = Date.now() - t0, st = 1;
@@ -45,7 +45,7 @@ SHIM = """<script id="the-copy-shim">
     return j;
   }
   if (location.protocol === 'file:' && !INLINE) {
-    // 開いた時に見本が一瞬出ないよう、最初の job.js は読み終えてから盤を描く
+    // 開いた時に見本が一瞬出ないよう、最初の job.js は読み終えてからダッシュボードを描く
     document.write('<script src="job.js"><\\/script>');
     setInterval(function(){
       var s = document.createElement('script');
@@ -123,24 +123,34 @@ def check_job(job):
     for i, p in enumerate(job.get("parts", [])):
         if p.get("lane") not in ("t2t", "i2i", "v2v"):
             errs.append(f"parts[{i}] の lane は t2t・i2i・v2v のどれかにしてください")
+    meter = job.get("meter", {}) or {}
+    for k in ("over_items", "under_items"):
+        v = meter.get(k)
+        if v is not None and (not isinstance(v, int) or not 0 <= v <= 6):
+            errs.append(f"meter.{k} は 0〜6 の整数（judge.md の6項目のうち当たった数）にしてください")
+    v = meter.get("same8")
+    if v is not None and (not isinstance(v, int) or v < 0):
+        errs.append("meter.same8 は 0 以上の整数（お手本と同じ8文字以上の並びの数）にしてください")
     for k in ("over", "under"):
-        v = job.get("meter", {}).get(k, 0)
+        v = meter.get(k, 0)
         if not isinstance(v, (int, float)) or not 0 <= v <= 100:
             errs.append(f"meter.{k} は 0〜100 にしてください")
+    if job.get("stage") == 7 and "over_items" not in meter:
+        errs.append("ステップ7では meter に over_items・under_items・same8（judge.md の当たりの数。本文に書く数と同じ）を入れてください")
     return errs
 
 
 def main():
-    ap = argparse.ArgumentParser(description="THE・COPY のコピー盤")
+    ap = argparse.ArgumentParser(description="THE・COPY のダッシュボード")
     ap.add_argument("--dir", default=".the-copy/board")
-    ap.add_argument("--init", action="store_true", help="盤の HTML を --dir に置く")
+    ap.add_argument("--init", action="store_true", help="ダッシュボードの HTML を --dir に置く")
     ap.add_argument("--stage", type=int)
     ap.add_argument("--job", help="JSON ファイルか JSON の文字列（変わった欄だけでよい）")
     ap.add_argument("--serve", type=int, metavar="PORT")
     ap.add_argument("--idle-exit", type=float, default=15, metavar="MIN",
                     help="--serve の時、job.json がこの分数変わらなければ自分で止まる（0 で止まらない）")
-    ap.add_argument("--inline", action="store_true", help="盤と job を1枚の HTML にまとめる（チャット用）")
-    ap.add_argument("--play", action="store_true", help="--inline の時、1段から順に動かす")
+    ap.add_argument("--inline", action="store_true", help="ダッシュボードと job を1枚の HTML にまとめる（チャット用）")
+    ap.add_argument("--play", action="store_true", help="--inline の時、ステップ1から順に動かす")
     ap.add_argument("--out", help="--inline の書き出し先（無ければ標準出力）")
     a = ap.parse_args()
 
@@ -166,10 +176,16 @@ def main():
         return
 
     os.makedirs(a.dir, exist_ok=True)
+    if a.init:
+        # 0.2 で作った作業フォルダの名前が残っていれば、ここで新しい名前に移す（rename_folders.py を先に動かし忘れた時の網）
+        sys.path.insert(0, HERE)
+        import rename_folders
+        if any(os.path.isdir(d) for d, _ in rename_folders.MOVES):
+            rename_folders.main(os.getcwd())
     if a.init or not os.path.exists(src_html):
         with open(ASSET, encoding="utf-8") as f:
             write_atomic(src_html, inject(f.read(), None, False))
-        print(f"○ 盤を置きました: {src_html}")
+        print(f"○ ダッシュボードを置きました: {src_html}")
 
     if a.stage is not None or a.job:
         jp = os.path.join(a.dir, "job.json")
@@ -177,6 +193,7 @@ def main():
         if os.path.exists(jp):
             with open(jp, encoding="utf-8") as f:
                 job = json.load(f)
+        prev = job.get("stage", 0)
         job = merge(job, load_job_arg(a.job))
         if a.stage is not None:
             job["stage"] = a.stage
@@ -188,6 +205,10 @@ def main():
         write_atomic(jp, text)
         write_atomic(os.path.join(a.dir, "job.js"), "window.THE_COPY_JOB = " + text + ";\n")
         print(f"○ {jp}: {job.get('stage', 0)} {STAGES.get(job.get('stage', 0))}")
+        st = job.get("stage", 0)
+        if isinstance(prev, int) and prev >= 1 and st > prev + 1:
+            skipped = "・".join(f"{i} {STAGES[i]}" for i in range(prev + 1, st))
+            print(f"△ ステップ {skipped} を飛ばしました。ダッシュボードは飛ばしたステップを順に見せてから {st} に進みます。次からは Step を始めるたびに1つずつ書いてください")
 
     if a.serve:
         class Quiet(http.server.SimpleHTTPRequestHandler):

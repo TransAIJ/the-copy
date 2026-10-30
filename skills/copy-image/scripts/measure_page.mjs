@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 // THE・COPY: ページを同じ幅・同じ切り方で撮り、文字の計算値を取る（i2i の Step 1 と Step 7）。
-// 元のページと自分の作ったページを同じ台本で測り、並べて比べるための物。
+// 元のページと自分の作ったページを同じ台本で測り、並べて比べるためのもの。
 //
 // 準備（作業フォルダで1回だけ。数分かかります）:
 //   npm i -D playwright && npx playwright install chromium
 // 使い方:
 //   node measure_page.mjs <URL かファイル> --out <フォルダ> [--width 390,1440] [--max 20]
-// 出す物（幅ごとに <フォルダ>/<幅>/）:
+// 出すもの（幅ごとに <フォルダ>/<幅>/）:
 //   part-01.png …  上から1画面ずつ撮った画像（--max 枚まで）
 //   texts.json     文字のある要素の計算値（位置・幅・大きさ・太さ・行間・字間・色・下地・書体・揃え・文字の頭40字）
 //   summary.md     ページの高さ、本文の列の幅、よく使う文字の大きさ・太さ・書体・色・下地、角の丸み、ボタン、画像の割合
@@ -167,7 +167,7 @@ try {
 } finally {
   await browser.close();
 }
-console.log(`\n見る順: 各幅の part-01.png から → summary.md → 細かい値は texts.json。自分の物も同じ幅で撮って並べる`);
+console.log(`\n見る順: 各幅の part-01.png から → summary.md → 細かい値は texts.json。自分のものも同じ幅で撮って並べる`);
 
 function summarize(src, width, vh, parts, d) {
   const body = d.texts.filter((t) => t.t.length >= 12);
@@ -201,7 +201,7 @@ function summarize(src, width, vh, parts, d) {
     `- 文字の色: ${line(top(d.texts, 'color'))}`,
     `- 下地の色: ${line(top(d.texts, 'bg'))}`,
     `- 角の丸み（40×20px以上の箱）: ${line(Object.entries(d.radii).sort((a, b) => b[1] - a[1]).slice(0, 5))}`,
-    `- ボタン（幅120・高さ36以上で色の付いた物）: ${d.ctas.length}個`,
+    `- ボタン（幅120・高さ36以上で色の付いたもの）: ${d.ctas.length}個`,
     ...d.ctas.slice(0, 6).map((c) => `  - ${(c.y / vh).toFixed(1)}画面目 ${c.w}×${c.h} 地 ${c.bg} 字 ${c.color} ${c.fs} 角 ${c.radius}「${c.t}」`),
     '',
     '## 大きい文字（見出しの候補）',

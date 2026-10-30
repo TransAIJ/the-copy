@@ -7,8 +7,8 @@
   "font": "Noto Sans CJK JP",            # Windows は "Meiryo"、Mac は "Hiragino Sans" など
   "telop": {"size": 76, "bottom": 0.30, "outline": 7, "color": "#FFFFFF", "outline_color": "#000000", "chars": 11,
             "red": "#E60012", "box": null},     # box に色（例 "#000000"）を入れると、縁取りでなく箱の上の文字になる
-  "bgm": {"file": "素材棚/自分の素材/bgm.mp3", "volume": 0.25},   # 無ければ省く
-  "voice": "素材棚/自分の素材/voice.wav",                         # 無ければ省く
+  "bgm": {"file": "素材/自分の素材/bgm.mp3", "volume": 0.25},   # 無ければ省く
+  "voice": "素材/自分の素材/voice.wav",                         # 無ければ省く
   "cuts": [ {"src": "画像か動画", "sec": 1.6, "text": "テロップの[[強調]]", "start": 0, "size": 96, "bottom": 0.5, "chars": 8} ]
                                         # size・bottom・chars はそのカットだけ変える時に書く
 }

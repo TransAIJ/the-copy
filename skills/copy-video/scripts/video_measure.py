@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """動画の場面を切り出して数える（v2v の Step 1 と Step 7）。ffmpeg と ffprobe が要る。
 
-場面の種類と順・場面の数を見るための道具です。秒数などの値は型に写しません。
+場面の種類と順・場面の数を見るためのツールです。秒数などの値は型に真似しません。
 
-測る物: 長さ・縦横・カットの変わり目（各カットの長さ）・無音の区間・音量（LUFS）・カットごとの1枚。
+測るもの: 長さ・縦横・カットの変わり目（各カットの長さ）・無音の区間・音量（LUFS）・カットごとの1枚。
 使い方:
   python3 video_measure.py <動画> --out <フォルダ> [--scene 0.3] [--noise -35] [--min-silence 0.3]
-出す物: <フォルダ>/cuts.json・summary.md・frames/cut-001.jpg …
+出すもの: <フォルダ>/cuts.json・summary.md・frames/cut-001.jpg …
 大きい動画でもメモリに全部を読まず、ffmpeg に流して測ります。
 """
 import argparse
