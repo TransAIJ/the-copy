@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "THE・COPY を配るためのマーケットプレイス（このリポジトリそのもの）",
-    "version": "0.3.1"
+    "version": "0.3.2"
   },
   "plugins": [
     {
@@ -14,7 +14,7 @@
       "displayName": "THE・COPY",
       "source": "./",
       "description": "伸びている他人のコンテンツをパーツに分け、売れている理由・構造・中身・情報量を真似し、寸法と言い回しは真似せず、自分の素材で同じ質のものを作る型（スキル）を残す。文章（t2t）・画像（i2i）・動画（v2v）の3つ。",
-      "version": "0.3.1",
+      "version": "0.3.2",
       "author": {
         "name": "TransAIJ"
       },

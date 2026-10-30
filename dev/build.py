@@ -9,6 +9,7 @@
   dist/the-copy-skill.zip    スキル版（1つのスキル。一番上は the-copy/。claude.ai のスキルのアップロードと .claude/skills/ のどちらでも動く）
 """
 import os
+import sys
 import shutil
 import zipfile
 
@@ -28,6 +29,7 @@ CLAUDE_MD = """# THE・COPY の作業フォルダ
 - 作る前に、先に `python3 .claude/skills/the-copy/scripts/rename_folders.py` を1回動かします（0.2 で作ったフォルダを新しい名前に移す台本。わたし.md と型は消えません。移すものが無ければ何もしません）
 - できた型（スキル）は `.claude/skills/<ブランド>-<用途>-<型>/` に置きます。次から同じ種類のものはその型で作ります
 - 台本は各スキルのフォルダの `scripts/` にあります（例: `python3 .claude/skills/the-copy/scripts/board.py`）。Python が無い時は、Claude が読んで数えます
+- お手本と同じ言い回しを数える時は、作業フォルダから `python3 .claude/skills/copy-text/scripts/text_stats.py --compare <お手本> <作ったもの>` を動かします。台本は作業フォルダから、この形の道筋で動かします（`cd` でスキルのフォルダに入ってから動かしません）
 - ダッシュボードは `.the-copy/board/` に置き、`mkdir -p .the-copy/board && nohup python3 .claude/skills/the-copy/scripts/board.py --dir .the-copy/board --init --serve 8765 > .the-copy/serve.log 2>&1 &` で裏に回して開きます（「裏の作業が終わった」と出ても、サーバーは動き続けています）。Step 1〜7 を始めるたびに `--stage <ステップ>` で1回ずつ書き、最後に 7 を書いた後もサーバーは止めません
 - 使う人の API キーやトークンを読み上げない・書き出さない。外に何も送らない
 """
@@ -121,9 +123,12 @@ ENTRY_SUBS = [
 # references/ の中の別のスキルの名前（スキル版では同じフォルダにある）
 REF_SUBS = [
     ("（copy-image の「写真の作り方」）", "（`references/image.md` の「写真の作り方」）"),
-    ("`copy-text/scripts/text_stats.py --compare <元> <作ったもの>`", "`scripts/text_stats.py --compare <元> <作ったもの>`"),
+    ("`../copy-text/scripts/text_stats.py --compare <元> <作ったもの>`", "`scripts/text_stats.py --compare <元> <作ったもの>`"),
 ]
 PART_SUBS = [
+    # copy-text のフォルダの中身の断り。スキル版では references/ が同じフォルダにあるので外す
+    ("\nこのスキルのフォルダにあるのは、この SKILL.md と `scripts/` だけです（references のフォルダはありません）。雛形と判定の手順は、隣の the-copy のフォルダの `../the-copy/references/` にあります。\n", ""),
+    ("`../the-copy/references/", "`references/"),
     ("the-copy スキル", "入口の SKILL.md"),
     ("the-copy の `references/", "`references/"),
     ("copy-image の①", "`references/image.md` の①"),
@@ -170,6 +175,8 @@ def build_skill():
             for fn in sorted(os.listdir(d)):
                 if fn in SKIP:
                     continue
+                if name == "the-copy" and fn == "text_stats.py":
+                    continue  # copy-text の本体へ渡すだけの台本。スキル版は本体が同じ scripts/ に入る
                 dst = os.path.join(out, sub, fn)
                 assert not os.path.exists(dst), dst
                 shutil.copy2(os.path.join(d, fn), dst)
@@ -187,7 +194,7 @@ def build_skill():
         for fn in fs:
             if fn.endswith(".md"):
                 t = open(os.path.join(r, fn), encoding="utf-8").read()
-                for w in ("copy-text", "copy-image", "copy-video", "the-copy スキル", "../copy-"):
+                for w in ("copy-text", "copy-image", "copy-video", "the-copy スキル", "../copy-", "../the-copy", "references のフォルダはありません"):
                     if w in t:
                         left.append(f"{os.path.relpath(os.path.join(r, fn), out)}: {w}")
     if left:
@@ -220,6 +227,11 @@ def main():
     build_skill()
     for z in ("the-copy.zip", "the-copy-starter.zip", "the-copy-skill.zip"):
         print(f"○ dist/{z}（{os.path.getsize(os.path.join(DIST, z)) // 1024} KB）")
+    # 手順の文に書いた道筋が、3つの zip のどれでもファイルに当たるか（当たらなければ止める）
+    import subprocess
+    r = subprocess.run([sys.executable, os.path.join(ROOT, "dev", "check_paths.py")])
+    if r.returncode:
+        sys.exit("× 当たらない道筋があるので止めました（dev/check_paths.py）")
 
 
 if __name__ == "__main__":
