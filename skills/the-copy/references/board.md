@@ -36,11 +36,12 @@
 
 ```bash
 # 最初の1回（Step 0）: ダッシュボードを置いて開く（小さなサーバーを裏で立てる。job.json が15分変わらないと自分で止まる）
-python3 scripts/board.py --dir .the-copy/board --init --serve 8765
+mkdir -p .the-copy/board && nohup python3 scripts/board.py --dir .the-copy/board --init --serve 8765 > .the-copy/serve.log 2>&1 &
 # Step 1〜7 のそれぞれを始める時に1回ずつ（ステップを飛ばさない）
 python3 scripts/board.py --dir .the-copy/board --stage 2 --job job-draft.json
 ```
 
+- `--serve` は、シェルの `nohup … &` で裏に回します（Claude Code の裏の作業にはしません）。コマンドはすぐ終わりますが、サーバーは動き続けます。「裏の作業が終わった」という知らせが出ても止まっていません。止まったかは `curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8765/` で見ます
 - `--serve` は `http://localhost:8765/` でダッシュボードを開けるようにします。Code タブではブラウザの枠で、端末ではいつものブラウザで開きます
 - `job.json` と同じ中身の `job.js` も書くので、サーバー無しで `index.html` を直接開いても動きます
 - `--job` に渡す JSON は、変わった欄だけでかまいません（前の中身に重ねます）

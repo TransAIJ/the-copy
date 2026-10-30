@@ -134,7 +134,7 @@ description: "THE・COPY（ザ・コピー）の入口。伸びている他人�
 
 ステップが進むたびに、今のステップとパーツをダッシュボードに出します。やり方は `references/board.md` です。
 
-- 作業フォルダ（Claude Code・Code タブ）: 最初の1回だけ `--init --serve 8765` を裏で動かして開き、Step 1〜7 を始めるたびに `python3 scripts/board.py --dir .the-copy/board --stage <ステップ> --job <job の JSON>` で書きます。最後に 7 を書いた後もサーバーは止めません（15分で自分で止まります）
+- 作業フォルダ（Claude Code・Code タブ）: 最初の1回だけ `--init --serve 8765` を裏で動かして開き（サーバーは `mkdir -p .the-copy/board && nohup python3 scripts/board.py --dir .the-copy/board --init --serve 8765 > .the-copy/serve.log 2>&1 &` のように、シェルの `nohup … &` で裏に回します（Claude Code の裏の作業にはしません）。このコマンドはすぐ終わりますが、サーバーは動き続けます。「裏の作業が終わった」という知らせが出ても止まっていません。止まったかは `curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8765/` で見ます（200 なら動いています））、Step 1〜7 を始めるたびに `python3 scripts/board.py --dir .the-copy/board --stage <ステップ> --job <job の JSON>` で書きます。最後に 7 を書いた後もサーバーは止めません（15分で自分で止まります）
 - チャット: ステップごとに出し直すと使う人の枠を使いすぎるので、**Step 2 の後と Step 7 の後の2回だけ**出します。`python3 scripts/board.py --inline` で1枚の HTML を作り、HTML の Artifact（またはファイル）として出します
 - 端末で「動きを減らす」設定の人には、動きが止まった画面で出ます
 
