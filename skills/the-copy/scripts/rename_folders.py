@@ -27,6 +27,9 @@ TEXT_SUBS = [("素材棚/元の物/", "素材/お手本/"), ("素材棚", "素�
              ("`元の物`", "`お手本`"), ("`できた物`", "`完成`"), ("コピー盤", "ダッシュボード"),
              ("できた物", "完成したもの"), ("元の物", "お手本")]
 TEMPLATE_NAMES = {".gitkeep", "README.md", "わたし.md"}
+# 新しい名前の場所 → 0.2 の時の書き方。ぶつかって名前を変えたファイルを、型の中の参照先にも反映するために使う
+OLD_PREFIX = [(os.path.join("素材", "お手本") + os.sep, ["素材棚/元の物/", "素材/元の物/", "元の物/"]), ("素材" + os.sep, ["素材棚/"]), ("完成" + os.sep, ["できた物/"])]
+RENAMED = []  # (0.2 の時の書き方の道筋, 並べた先の道筋)
 
 
 def is_template(path):
@@ -90,6 +93,12 @@ def merge(root, old, new, log):
             s = side_name(t)
             shutil.move(o, s)
             log.append(f"  同じ名前があったので並べた: {os.path.relpath(s, root)}")
+            rel_t, rel_s = os.path.relpath(t, root), os.path.relpath(s, root).replace(os.sep, "/")
+            for pre, olds in OLD_PREFIX:
+                if rel_t.startswith(pre):
+                    for op in olds:
+                        RENAMED.append((op + rel_t[len(pre):].replace(os.sep, "/"), rel_s))
+                    break
     try:
         os.rmdir(old)
     except OSError:
@@ -115,6 +124,7 @@ def text_files(root):
 def main(root=None):
     root = os.path.abspath(root or (sys.argv[1] if len(sys.argv) > 1 else "."))
     log = []
+    RENAMED.clear()
     for old_rel, new_rel in MOVES:
         old, new = os.path.join(root, old_rel), os.path.join(root, new_rel)
         if not os.path.isdir(old):
@@ -129,6 +139,9 @@ def main(root=None):
         with open(p, encoding="utf-8", errors="replace") as f:
             t = f.read()
         o = t
+        # 並べたファイルを指していた所は、並べた先に書き換える（フォルダの名前の書き換えより先に）
+        for a, b in sorted(RENAMED, key=lambda x: -len(x[0])):
+            t = t.replace(a, b)
         for a, b in TEXT_SUBS:
             t = t.replace(a, b)
         if t != o:
