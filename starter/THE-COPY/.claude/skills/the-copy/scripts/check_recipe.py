@@ -3,6 +3,9 @@
 0.2 までの見出し（部品と工程・①写す物）で書いた型も、そのまま通る。
 
 使い方: python3 check_recipe.py <型のフォルダ>/SKILL.md
+
+結果は「○」か「×」で始まる文で出します。「×」の時も台本は正しく終わります
+（終わり方が 0 でないのは、ファイルを渡し忘れた時だけです）。
 """
 import os
 import re
@@ -135,7 +138,8 @@ def main():
         print(f"× {len(errors)}件")
         for e in errors:
             print(f"- {e}")
-        sys.exit(1)
+        print("上を直してから、もう一度動かしてください")
+        return
     print(f"○ パーツ{len(ids)}つ・②の欄{len(info)}つ。パーツごとの売れている理由と、②の在りかがすべてあります")
 
 

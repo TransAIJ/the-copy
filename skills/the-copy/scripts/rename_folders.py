@@ -12,6 +12,9 @@
 CLAUDE.md・素材/README.md・.claude/skills/ の中の Markdown に書かれたフォルダの名前も書き換え、
 書き換える前のファイルは .the-copy/before-0.3/ に写して残します。何度動かしても同じ結果になります。
 
+最後に、今の作業フォルダの様子（一番上のファイルとフォルダ、素材/ と 完成/ の中、自分の型、わたし.md が書いてあるか）を出します。
+この台本は単独で動かします。ls などをつなぐ必要はありません。
+
 使い方: python3 rename_folders.py [作業フォルダ]   （省くと今いるフォルダ）
 """
 import filecmp
@@ -121,7 +124,42 @@ def text_files(root):
                     yield os.path.join(r, fn)
 
 
-def main(root=None):
+def listing(path):
+    names = []
+    for n in sorted(os.listdir(path)):
+        names.append(n + "/" if os.path.isdir(os.path.join(path, n)) else n)
+    return "  ".join(names) if names else "（空）"
+
+
+def show_state(root):
+    """今の作業フォルダの様子を出す（Claude が ls で見に行かなくて済むように）"""
+    print("\n今の作業フォルダ:")
+    print(f"  {listing(root)}")
+    mat = os.path.join(root, "素材")
+    if os.path.isdir(mat):
+        print(f"素材/ の中:\n  {listing(mat)}")
+    else:
+        print("素材/: まだありません（使う時に作ります）")
+    done = os.path.join(root, "完成")
+    if os.path.isdir(done):
+        print(f"完成/ の中（同じ名前のフォルダには上書きしません）:\n  {listing(done)}")
+    sk = os.path.join(root, ".claude", "skills")
+    own = []
+    if os.path.isdir(sk):
+        own = [n for n in sorted(os.listdir(sk)) if os.path.isdir(os.path.join(sk, n))
+               and n not in ("the-copy", "copy-text", "copy-image", "copy-video")]
+    print(f"自分の型（.claude/skills/ の中）: {'  '.join(own) if own else 'まだありません'}")
+    me = os.path.join(mat, "わたし.md")
+    if not os.path.exists(me):
+        me = os.path.join(root, "わたし.md")
+    if os.path.exists(me):
+        state = "ひな形のままで、まだ書いていません" if is_template(me) else "書いてあります"
+        print(f"わたし.md: {os.path.relpath(me, root)} は{state}")
+    else:
+        print("わたし.md: まだありません")
+
+
+def main(root=None, show=True):
     root = os.path.abspath(root or (sys.argv[1] if len(sys.argv) > 1 else "."))
     log = []
     RENAMED.clear()
@@ -154,6 +192,8 @@ def main(root=None):
         print("\n".join(log))
     else:
         print("○ 移すものはありません（もう 0.3 の名前です）")
+    if show:
+        show_state(root)
 
 
 if __name__ == "__main__":

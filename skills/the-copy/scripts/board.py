@@ -71,12 +71,30 @@ STAGES = {0: "待つ", 1: "見る", 2: "分ける", 3: "①と②", 4: "埋め�
 
 
 def load_job_arg(value):
+    """--job を読む。読めない時は None を返す（呼ぶ側が「×」の文を出して、0 で終える）"""
     if value is None:
         return {}
-    if os.path.exists(value):
-        with open(value, encoding="utf-8") as f:
-            return json.load(f)
-    return json.loads(value)
+    try:
+        if os.path.exists(value):
+            with open(value, encoding="utf-8") as f:
+                text = f.read()
+        else:
+            text = value
+        if not text.strip():
+            return None
+        job = json.loads(text)
+    except (OSError, ValueError):
+        return None
+    return job if isinstance(job, dict) else None
+
+
+def refuse(msg):
+    # 結果は文で返し、終わり方は 0 にする（0 以外で終わると、Claude Code の画面に赤い「Error」が出て、使う人が壊れたと読む）
+    print("× " + msg + "（job.json は書き換えていません。直してもう一度動かしてください）")
+    sys.exit(0)
+
+
+BAD_JOB = "--job の中身が読めませんでした。空か、JSON の形になっていません。{\"stage\": 7, \"meter\": {...}} のように渡してください"
 
 
 def merge(base, extra):
@@ -136,7 +154,9 @@ def check_job(job):
         if not isinstance(v, (int, float)) or not 0 <= v <= 100:
             errs.append(f"meter.{k} は 0〜100 にしてください")
     if job.get("stage") == 7 and "over_items" not in meter:
-        errs.append("ステップ7では meter に over_items・under_items・same8（judge.md の当たりの数。本文に書く数と同じ）を入れてください")
+        errs.append("ステップ7では meter が要ります。judge.md の6項目ずつで、真似しすぎに当たった数（over_items）と真似できていないに当たった数（under_items）を数え、"
+                    "同じ8文字以上の並びの数（same8）と一緒に、本文で使う人に伝える数と同じにして "
+                    "--stage 7 --job '{\"meter\": {\"over_items\": <数>, \"under_items\": <数>, \"same8\": <数>}}' で書き直してください")
     return errs
 
 
@@ -159,12 +179,13 @@ def main():
 
     if a.inline:
         job = load_job_arg(a.job)
+        if job is None:
+            refuse(BAD_JOB)
         if a.stage is not None:
             job["stage"] = a.stage
         errs = check_job(job)
         if errs:
-            print("× " + " / ".join(errs), file=sys.stderr)
-            sys.exit(1)
+            refuse(" / ".join(errs))
         with open(base_html_path, encoding="utf-8") as f:
             html = inject(f.read(), job, a.play)
         if a.out:
@@ -181,7 +202,7 @@ def main():
         sys.path.insert(0, HERE)
         import rename_folders
         if any(os.path.isdir(d) for d, _ in rename_folders.MOVES):
-            rename_folders.main(os.getcwd())
+            rename_folders.main(os.getcwd(), show=False)
     if a.init or not os.path.exists(src_html):
         with open(ASSET, encoding="utf-8") as f:
             write_atomic(src_html, inject(f.read(), None, False))
@@ -194,13 +215,15 @@ def main():
             with open(jp, encoding="utf-8") as f:
                 job = json.load(f)
         prev = job.get("stage", 0)
-        job = merge(job, load_job_arg(a.job))
+        extra = load_job_arg(a.job)
+        if extra is None:
+            refuse(BAD_JOB)
+        job = merge(job, extra)
         if a.stage is not None:
             job["stage"] = a.stage
         errs = check_job(job)
         if errs:
-            print("× " + " / ".join(errs), file=sys.stderr)
-            sys.exit(1)
+            refuse(" / ".join(errs))
         text = json.dumps(job, ensure_ascii=False, indent=1)
         write_atomic(jp, text)
         write_atomic(os.path.join(a.dir, "job.js"), "window.THE_COPY_JOB = " + text + ";\n")

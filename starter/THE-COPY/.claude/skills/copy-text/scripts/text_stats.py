@@ -6,6 +6,9 @@
 使い方:
   python3 text_stats.py <文章.txt>                     # 数える
   python3 text_stats.py --compare <元.txt> <作った.txt> [--n 8] [--allow "Claude Code,無料"]
+
+結果は最後の「判定:」の行で文にして出します。同じ並びが見つかった時も、台本は正しく終わります
+（終わり方が 0 でないのは、ファイルの渡し方を間違えた時だけです）。
 """
 import argparse
 import json
@@ -118,7 +121,10 @@ def main():
     print(f"\n元と同じ{a.n}文字以上の並び: {len(spans)}か所")
     for sp in spans:
         print(f"- {sp}")
-    sys.exit(1 if spans else 0)
+    if spans:
+        print(f"\n判定: 真似しすぎ（{len(spans)}か所）。上の並びを自分の言葉に書き直してから、もう一度数えてください")
+    else:
+        print("\n判定: お手本と同じ並びはありません")
 
 
 if __name__ == "__main__":
